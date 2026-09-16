@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Hardhat & Smart Contracts
+hardhat/artifacts/
+hardhat/cache/
+hardhat/typechain-types/
+
+# Next.js Frontend
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Python Backend
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/venv/
+backend/.venv/
+backend/__pycache__/
+backend/app/__pycache__/
+
+# Environment & Secret files
+.env
+.env.local
+.env.production
+backend/.env
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
