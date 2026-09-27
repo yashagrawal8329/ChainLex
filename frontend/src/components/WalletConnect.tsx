@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Wallet, CheckCircle2, AlertCircle } from "lucide-react";
 import { ethers } from "ethers";
+import { ensureSepolia } from "@/lib/web3";
 
 interface WalletConnectProps {
   onAccountChange?: (account: string | null) => void;
@@ -11,7 +12,7 @@ interface WalletConnectProps {
 export default function WalletConnect({ onAccountChange }: WalletConnectProps) {
   const [account, setAccount] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [networkName, setNetworkName] = useState<string>("Localhost 8545");
+  const [networkName, setNetworkName] = useState<string>("Sepolia");
 
   useEffect(() => {
     checkConnectedAccount();
@@ -48,8 +49,9 @@ export default function WalletConnect({ onAccountChange }: WalletConnectProps) {
 
     setIsConnecting(true);
     try {
-      const provider = new ethers.BrowserProvider((window as any).ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
+        await ensureSepolia();
+        const provider = new ethers.BrowserProvider((window as any).ethereum);
+        const accounts = await provider.send("eth_requestAccounts", []);
       if (accounts.length > 0) {
         setAccount(accounts[0]);
         if (onAccountChange) onAccountChange(accounts[0]);

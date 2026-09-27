@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import ContractUpload from "@/components/ContractUpload";
 import AnalysisDashboard from "@/components/AnalysisDashboard";
 import VerificationPanel from "@/components/VerificationPanel";
+import RemixGuide from "@/components/RemixGuide";
 import { ContractAnalysisResponse } from "@/types";
-import { Shield, Sparkles, Scale, Cpu, FileCheck } from "lucide-react";
+import { hydrateChainConfig } from "@/lib/web3";
+import { Shield, Sparkles, Scale, Cpu } from "lucide-react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"analyze" | "verify">("analyze");
@@ -14,7 +16,11 @@ export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<ContractAnalysisResponse | null>(null);
   const [targetVerifyHash, setTargetVerifyHash] = useState<string>("");
 
-  const handleAnalysisComplete = (result: ContractAnalysisResponse, file: File) => {
+  useEffect(() => {
+    hydrateChainConfig();
+  }, []);
+
+  const handleAnalysisComplete = (result: ContractAnalysisResponse) => {
     setAnalysisResult(result);
   };
 
@@ -65,6 +71,7 @@ export default function Home() {
 
                 {/* File Upload Component */}
                 <ContractUpload onAnalysisComplete={handleAnalysisComplete} />
+                <RemixGuide />
 
                 {/* Feature Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
@@ -133,7 +140,7 @@ export default function Home() {
             <span>— Full-Stack Legal Tech & Blockchain Verification Platform</span>
           </div>
           <div>
-            <span>Powered by Solidity • Hardhat • FastAPI • Next.js 14</span>
+            <span>Powered by Solidity • Remix IDE • Supabase • FastAPI • Next.js 14</span>
           </div>
         </div>
       </footer>

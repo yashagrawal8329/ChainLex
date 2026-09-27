@@ -43,40 +43,36 @@ ChainLex/
 
 ---
 
-## Quick Start Guide
+## API keys
 
-### 1. Smart Contract (Hardhat)
-```bash
-cd hardhat
+Required (backend only):
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
-# Install dependencies & run test suite
-npm install
-npx hardhat test
+Optional:
+- `GEMINI_API_KEY` (LLM analysis; app works without it)
 
-# Run local Hardhat blockchain node & deploy contract
-npx hardhat node
-npx hardhat run scripts/deploy.ts --network localhost
-```
+Not required:
+- Infura / Alchemy (uses free public Sepolia RPC)
+- Remix IDE (no key)
 
-### 2. Backend API (FastAPI)
+SQL: run `backend/supabase/schema.sql` in the Supabase SQL Editor.
+
+Blockchain deploy: follow `hardhat/REMIX_DEPLOY.md`, then set `CONTRACT_ADDRESS` in `backend/.env`.
+
+### Backend
 ```bash
 cd backend
-
-# Install Python requirements
-pip install -r requirements.txt
-
-# Start FastAPI dev server on http://localhost:8000
+pip install --break-system-packages -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 3. Frontend Dashboard (Next.js)
+### Frontend (proxies /api to backend)
 ```bash
 cd frontend
-
-# Install dependencies & start dev server
 npm install
 npm run dev
-# Open http://localhost:3000 in your browser
 ```
 
 ---

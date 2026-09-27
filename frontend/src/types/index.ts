@@ -15,6 +15,7 @@ export interface ContractMetadata {
 }
 
 export interface ContractAnalysisResponse {
+  id?: string;
   filename: string;
   file_size_bytes: number;
   sha256_hash: string;
@@ -27,6 +28,9 @@ export interface ContractAnalysisResponse {
   clauses: ClauseAnalysis[];
   summary: string;
   suggested_action: string;
+  persisted?: boolean;
+  anchored?: boolean;
+  tx_hash?: string;
 }
 
 export interface OnChainVerificationResult {

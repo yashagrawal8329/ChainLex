@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { calculateBrowserSHA256 } from "@/lib/web3";
+import { analyzeContractFile } from "@/lib/api";
 import { ContractAnalysisResponse } from "@/types";
 
 interface ContractUploadProps {
@@ -53,24 +54,8 @@ export default function ContractUpload({ onAnalysisComplete }: ContractUploadPro
     setErrorMessage(null);
 
     try {
-      // 1. Calculate SHA-256 locally
-      const { hashHex, docHashBytes32 } = await calculateBrowserSHA256(file);
-
-      // 2. Post to FastAPI backend API
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${API_URL}/api/contracts/analyze`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Backend API returned error code ${response.status}`);
-      }
-
-      const result: ContractAnalysisResponse = await response.json();
+      await calculateBrowserSHA256(file);
+      const result = await analyzeContractFile(file);
       onAnalysisComplete(result, file);
     } catch (err: any) {
       console.warn("Backend API unavailable or error occurred. Using client-side analysis engine fallback.", err);

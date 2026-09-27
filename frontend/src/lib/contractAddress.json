@@ -1,6 +1,8 @@
 {
-  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  "network": "localhost",
-  "chainId": 31337,
-  "deployedAt": "2026-09-15T18:10:54.395Z"
+  "address": "0x0ae7C91adFd6a3735e4F3E6C44DE6e87A88748f7",
+  "network": "sepolia",
+  "chainId": 11155111,
+  "rpcUrl": "https://ethereum-sepolia-rpc.publicnode.com",
+  "deployedAt": "2026-09-27T00:00:00.000Z",
+  "explorer": "https://sepolia.etherscan.io/address/0x0ae7C91adFd6a3735e4F3E6C44DE6e87A88748f7"
 }

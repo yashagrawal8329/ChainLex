@@ -20,7 +20,8 @@ import {
   Check
 } from "lucide-react";
 import { ContractAnalysisResponse } from "@/types";
-import { anchorOnChain } from "@/lib/web3";
+import { persistAnchor } from "@/lib/api";
+import { anchorOnChain, getContractAddress } from "@/lib/web3";
 
 interface AnalysisDashboardProps {
   analysis: ContractAnalysisResponse;
@@ -35,8 +36,9 @@ export default function AnalysisDashboard({
 }: AnalysisDashboardProps) {
   const [expandedClause, setExpandedClause] = useState<number | null>(0);
   const [isAnchoring, setIsAnchoring] = useState(false);
-  const [anchorTxHash, setAnchorTxHash] = useState<string | null>(null);
+  const [anchorTxHash, setAnchorTxHash] = useState<string | null>(analysis.tx_hash || null);
   const [anchorError, setAnchorError] = useState<string | null>(null);
+  const [persisted, setPersisted] = useState(Boolean(analysis.persisted));
   const [copiedHash, setCopiedHash] = useState(false);
 
   const getRiskBadgeColor = (level: string) => {
@@ -63,20 +65,29 @@ export default function AnalysisDashboard({
     setAnchorTxHash(null);
 
     try {
-      const metadataURI = `ipfs://chainlex-${analysis.sha256_hash.slice(0, 10)}`;
+      if (!account) {
+        throw new Error("Connect MetaMask first.");
+      }
+      const metadataURI = `supabase://contracts/${analysis.sha256_hash.slice(0, 16)}`;
       const receipt = await anchorOnChain(
         analysis.doc_hash_bytes32,
         analysis.metadata.title || analysis.filename,
         metadataURI
       );
-
-      setAnchorTxHash(receipt.hash || "0x_simulated_tx_hash_success");
+      const txHash = receipt.hash;
+      setAnchorTxHash(txHash);
+      const saved = await persistAnchor({
+        sha256_hash: analysis.sha256_hash,
+        doc_hash_bytes32: analysis.doc_hash_bytes32,
+        tx_hash: txHash,
+        wallet_address: account,
+        contract_address: getContractAddress(),
+        filename: analysis.filename,
+        title: analysis.metadata.title,
+      });
+      setPersisted(Boolean(saved?.persisted));
     } catch (err: any) {
-      console.warn("Web3 wallet anchor warning:", err);
-      // Simulated successful on-chain anchoring fallback for demo
-      setTimeout(() => {
-        setAnchorTxHash(`0x${Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')}`);
-      }, 1000);
+      setAnchorError(err?.message || "Anchor failed. Deploy the contract in Remix first.");
     } finally {
       setIsAnchoring(false);
     }
@@ -124,7 +135,7 @@ export default function AnalysisDashboard({
               <div className="flex flex-col items-end gap-1">
                 <div className="flex items-center gap-2 bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-glow">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Anchored On-Chain!</span>
+                  <span>{persisted ? "Anchored + saved in Supabase" : "Anchored On-Chain"}</span>
                 </div>
                 <button
                   onClick={() => onSwitchToVerify(analysis.sha256_hash)}
@@ -135,14 +146,18 @@ export default function AnalysisDashboard({
                 </button>
               </div>
             ) : (
-              <button
-                onClick={handleAnchor}
-                disabled={isAnchoring}
-                className="w-full lg:w-auto flex items-center justify-center gap-2.5 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-600 hover:opacity-90 text-slate-950 font-bold px-6 py-3 rounded-2xl transition-all duration-300 shadow-glow active:scale-95 disabled:opacity-50"
-              >
-                <Anchor className="w-4 h-4" />
-                <span>{isAnchoring ? "Anchoring on Blockchain..." : "Anchor Contract to Blockchain"}</span>
-              </button>
+              <div className="flex flex-col items-end gap-2 w-full lg:w-auto">
+                <button
+                  onClick={handleAnchor}
+                  disabled={isAnchoring}
+                  className="w-full lg:w-auto flex items-center justify-center gap-2.5 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-600 hover:opacity-90 text-slate-950 font-bold px-6 py-3 rounded-2xl transition-all duration-300 shadow-glow active:scale-95 disabled:opacity-50"
+                >
+                  <Anchor className="w-4 h-4" />
+                  <span>{isAnchoring ? "Anchoring on Blockchain..." : "Anchor Contract to Blockchain"}</span>
+                </button>
+                {anchorError && <p className="text-[11px] text-rose-400 max-w-xs text-right">{anchorError}</p>}
+                {analysis.persisted && <p className="text-[11px] text-teal-400">Saved in Supabase</p>}
+              </div>
             )}
           </div>
         </div>
